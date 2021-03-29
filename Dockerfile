@@ -81,8 +81,8 @@ ADD https://dl.bintray.com/boostorg/release/1.75.0/source/boost_1_75_0.tar.gz /s
 RUN cd /src \
 	&& tar -xzf boost.tar.gz \
 	&& cd boost_1_75_0 \
-	&& ./bootstrap.sh --prefix=/install/boost \
-	&& ./b2 install \
+	&& ./bootstrap.sh --prefix=/usr \
+	&& ./b2 --prefix=/install/usr install \
 	&& cd / \
 	&& rm -rf /src	
 
@@ -93,15 +93,15 @@ RUN cd /src \
 	&& tar -xzf cmake.tar.gz \
 	&& mkdir -p cmake-3.20.0/build \
 	&& cd cmake-3.20.0/build \
-	&& ../configure \
+	&& ../configure --prefix=/usr \
 	&& make \
-	&& DESTDIR=/install/cmake make install \
+	&& DESTDIR=/install make install \
 	&& cd / \
 	&& rm -rf /src	
 
 # cmake sub-image
 FROM base as cmake
-COPY --from=cmake_build /install/cmake /
+COPY --from=cmake_build /install /
 
 # GTest build sub-image
 FROM cmake as gtest_build
@@ -112,13 +112,13 @@ RUN	cd /src \
 	&& mkdir -p /src/googletest-release-1.8.1/build \
 	&& cd /src/googletest-release-1.8.1/build \
 	&& patch -i /src/gtest-01.patch -d .. \
-	&& cmake .. -DCMAKE_INSTALL_PREFIX=/install/gtest \
+	&& cmake .. -DCMAKE_INSTALL_PREFIX=/usr \
 	&& cmake --build . \
-	&& make install \
+	&& DESTDIR=/install make install \
 	&& cd / \
 	&& rm -rf /src	
 
 # Main image
 FROM cmake
-COPY --from=boost_build /install/boost /usr/local/
-COPY --from=gtest_build /install/gtest /usr/local/
+COPY --from=boost_build /install /
+COPY --from=gtest_build /install /
