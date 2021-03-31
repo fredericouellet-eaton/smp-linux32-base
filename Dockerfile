@@ -43,6 +43,7 @@ RUN 	apt-get -y update \
 			make \
 			makeself \
 			nano \
+			ninja-build \
 			openjdk-8-jre \
 			python \
 			python-magic \
@@ -77,11 +78,12 @@ ENV LC_ALL en_US.UTF-8
 
 # Boost build sub-image
 FROM base as boost_build
-ADD https://dl.bintray.com/boostorg/release/1.75.0/source/boost_1_75_0.tar.gz /src/boost.tar.gz
+ADD https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz /src/boost.tar.gz
 RUN cd /src \
 	&& tar -xzf boost.tar.gz \
-	&& cd boost_1_75_0 \
+	&& cd boost_1_72_0 \
 	&& ./bootstrap.sh --prefix=/usr \
+	&& ./b2 \
 	&& ./b2 --prefix=/install/usr install \
 	&& cd / \
 	&& rm -rf /src	
