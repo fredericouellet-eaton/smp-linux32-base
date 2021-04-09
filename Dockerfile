@@ -35,7 +35,6 @@ RUN 	apt-get -y update \
 			git-core \
 			iputils-ping \
 			java-common \
-			lcov \
 			libsdl1.2-dev \
 			libssl-dev \
 			libsystemd-dev \
@@ -120,7 +119,18 @@ RUN	cd /src \
 	&& cd / \
 	&& rm -rf /src	
 
+# LCov build sub-image
+FROM base as lcov_build
+ADD https://downloads.sourceforge.net/project/ltp/Coverage%20Analysis/LCOV-1.14/lcov-1.14.tar.gz?ts=1617989082&r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fltp%2Ffiles%2FCoverage%2520Analysis%2FLCOV-1.14%2Flcov-1.14.tar.gz%2Fdownload%3Fuse_mirror%3Dphoenixnap /src/
+RUN cd /src \
+	&& tar -xzf lcov-1.14.tar.gz \
+	&& cd lcov-1.14 \
+	&& DESTDIR=/install make install \
+	&& cd / \
+	&& rm -rf /src		
+
 # Main image
 FROM cmake
 COPY --from=boost_build /install /
 COPY --from=gtest_build /install /
+COPY --from=lcov_build /install /
